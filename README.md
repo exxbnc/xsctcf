@@ -21,7 +21,9 @@ Minor modifications were made in order to get sct to:
 
 # Chinese Flux Usage
 
-Define your settings in the header file and make. The f.lux ripoff will check what hour it is local time and change the temperature of the screen gradually.
+Define your settings in the header file and make. The f.lux ripoff will check what hour it is local time and change the temperature of the screen gradually based on parameters. 
+
+Limitations: Only able to set two temeratures and two times. 
 
 # Installation
 
