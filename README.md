@@ -6,6 +6,10 @@ temperature of your screen. It is simpler than [Redshift](https://github.com/jon
 Original code was published by Ted Unangst in the public domain:
 https://www.tedunangst.com/flak/post/sct-set-color-temperature
 
+Original program can be found here https://github.com/faf0/sct.
+
+Reason for making this is a lack of a f.lux linux counter part. A very primative implementation but works for my needs.
+
 Minor modifications were made in order to get sct to:
 - compile on Ubuntu 14.04 and later releases
 - iterate over all screens of the default display and change the color
@@ -14,6 +18,10 @@ Minor modifications were made in order to get sct to:
 - fix memleaks
 - clean up code
 - return `EXIT_SUCCESS`
+
+# Chinese Flux Usage
+
+Define your settings in the header file and make. The f.lux ripoff will check what hour it is local time and change the temperature of the screen gradually.
 
 # Installation
 
