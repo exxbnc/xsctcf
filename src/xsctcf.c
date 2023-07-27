@@ -219,21 +219,28 @@ int main(int argc, char **argv) {
         cFTemp.temp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug).temp;
 
         int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
-        int direction = newTemp > cFTemp.temp ? STEP_DIST: -STEP_DIST;
+        int step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
 
         while(1) {
             currentTime = time(NULL);
             localTime = localtime(&currentTime);
             currentHour = localTime->tm_hour;
 
-            for(;(newTemp >= cFTemp.temp && direction == STEP_DIST) || (newTemp <= cFTemp.temp && direction == -STEP_DIST); cFTemp.temp += direction) {
+            if(fdebug) printf("DEBUG:\nStep: %d\nCurrent Temp: %d\nNew Temp: %d\n\n",step,cFTemp.temp,newTemp);
+
+            while(!step || (newTemp > cFTemp.temp && step == STEP_DIST) || (newTemp < cFTemp.temp && step == -STEP_DIST)) {
                 for(screen = screen_first; screen <= screen_last; screen++)
                     sct_for_screen(dpy, screen, crtc_specified, cFTemp, fdebug);
+
+
+                if(step) cFTemp.temp += step;
+                else step = STEP_DIST;
+
                 usleep(STEP_SLEEP);
             }
 
             newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
-            direction = newTemp > cFTemp.temp ? STEP_DIST : -STEP_DIST;
+            step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
 
             sleep(TIME_SLEEP);
         }
