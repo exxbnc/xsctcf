@@ -21,11 +21,14 @@ Reason for making this is a lack of a f.lux counter part for linux. I do not lik
 
 Define your settings in the header file and make. The f.lux ripoff will check what hour it is local time and change the temperature of the screen gradually based on parameters. 
 
+Can use --verbose aswell to test your config to make sure it works as intented. 
+
 Limitations: 
 - Only able to set two temeratures and two times
 - Needs to be killed manually
 - The program assumes that once running you will not change the screen temperature manually. With this it means the program has no clue what the screen temperature is after the initial        check. It will jump back to what the program thinks it should be. This is so it doesn't do unneccesary checks on the screen temperature.
 - The program will know the start temp, the lower bound, upper bound, and step distance it will find values closest to these that are devisiable by the step distance. Finds decently close values for up to a step distance of 23. The highest I tested. I would not use a large step distance as it defeats the purpose of using the f.lux capabilities.
+- Possible bugs that I am unaware of but works for what I need it to.
 
 # Installation
 
