@@ -40,7 +40,7 @@
 #define USER_MAX             6000         // MAX TEMP
 #define USER_BRIGHT           1.0         // BRRIGHTNESS
 #define MORNING_TIME            9         // TIME IN HOURS FOR MORNING
-#define NIGHT_TIME             21         // TIME IN HOURS FOR NIGHT 
+#define NIGHT_TIME             22         // TIME IN HOURS FOR NIGHT 
 #define TIME_SLEEP             10         // SLEEP TIME BETWEEN CHECKS IN SECONDS
 #define STEP_SLEEP          50000         // SLEEP TIME BETWEEN TEMP STEPS IN MICROSECONDS 
 #define STEP_DIST               1         // STEP BETWEEN COLORS
