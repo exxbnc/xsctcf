@@ -240,7 +240,7 @@ int main(int argc, char **argv) {
             localTime = localtime(&currentTime);
             currentHour = localTime->tm_hour;
 
-            if(fdebug) printf("DEBUG:\nStep: %d\nCurrent Temp: %d\nMax Temp: %d\nMin Temp: %d\n\n",step,cFTemp.temp,feasibleMax,feasibleMin);
+            if(fdebug) fprintf(stderr,"DEBUG:\nStep: %d\nCurrent Temp: %d\nMax Temp: %d\nMin Temp: %d\n\n",step,cFTemp.temp,feasibleMax,feasibleMin);
 
             while(!step || newTemp != cFTemp.temp) {
                 for(screen = screen_first; screen <= screen_last; screen++)
