@@ -25,7 +25,7 @@ Limitations:
 - Only able to set two temeratures and two times
 - Needs to be killed manually
 - The program assumes that once running you will not change the screen temperature manually. With this it means the program has no clue what the screen temperature is after the initial        check. It will jump back to what the program thinks it should be. This is so it doesn't do unneccesary checks on the screen temperature.
-- The program will know the start temp, the lower bound, upper bound, and step it will find values closest to these. Finds decently close values for up to a step distance of 23. The highest I tested. I would not use a substancially large value as it defeats the purpose of using the f.lux capabilities.
+- The program will know the start temp, the lower bound, upper bound, and step distance it will find values closest to these that are devisiable by the step distance. Finds decently close values for up to a step distance of 23. The highest I tested. I would not use a large step distance as it defeats the purpose of using the f.lux capabilities.
 
 # Installation
 
