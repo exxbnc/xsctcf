@@ -206,6 +206,12 @@ int main(int argc, char **argv) {
     }
 
     if(cflux) {
+
+        if(!(STEP_DIST > 0)) exit(EXIT_FAILURE);
+
+        int feasibleMin = USER_MIN;
+        int feasibleMax = USER_MAX;
+
         time_t currentTime;
         struct tm *localTime;
         int currentHour = 0;
@@ -218,20 +224,27 @@ int main(int argc, char **argv) {
         cFTemp.brightness = USER_BRIGHT;
         cFTemp.temp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug).temp;
 
-        int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
-        int step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
+        
+        int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
+        int step = newTemp > cFTemp.temp ? STEP_DIST : -STEP_DIST;
 
+        cFTemp.temp = ((cFTemp.temp + step / 2) / step) * step;        
+        feasibleMin = ((feasibleMin + step / 2) / step) * step;
+        feasibleMax = ((feasibleMax + step / 2) / step) * step;
+
+        newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
+        step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
+        
         while(1) {
             currentTime = time(NULL);
             localTime = localtime(&currentTime);
             currentHour = localTime->tm_hour;
 
-            if(fdebug) printf("DEBUG:\nStep: %d\nCurrent Temp: %d\nNew Temp: %d\n\n",step,cFTemp.temp,newTemp);
+            if(fdebug) printf("DEBUG:\nStep: %d\nCurrent Temp: %d\nMax Temp: %d\nMin Temp: %d\n\n",step,cFTemp.temp,feasibleMax,feasibleMin);
 
-            while(!step || (newTemp > cFTemp.temp && step == STEP_DIST) || (newTemp < cFTemp.temp && step == -STEP_DIST)) {
+            while(!step || newTemp != cFTemp.temp) {
                 for(screen = screen_first; screen <= screen_last; screen++)
                     sct_for_screen(dpy, screen, crtc_specified, cFTemp, fdebug);
-
 
                 if(step) cFTemp.temp += step;
                 else step = STEP_DIST;
@@ -239,7 +252,7 @@ int main(int argc, char **argv) {
                 usleep(STEP_SLEEP);
             }
 
-            newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
+            newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
             step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
 
             sleep(TIME_SLEEP);
