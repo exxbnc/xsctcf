@@ -10,7 +10,7 @@ Original source code can be found here https://github.com/faf0/sct.
 
 Reason for making this is a lack of a f.lux counter part for linux. I do not like redshift. A very primative implementation but works for my needs.
 
-# XSCTCF Changes over ttps://github.com/faf0/sct.
+# XSCTCF Changes over faf0/sct.
 - fixed the header locations
 - added -f (--chinese-flux) to use the chinese flux option
 - some syntatic changes
