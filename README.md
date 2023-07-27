@@ -6,24 +6,25 @@ temperature of your screen. It is simpler than [Redshift](https://github.com/jon
 Original code was published by Ted Unangst in the public domain:
 https://www.tedunangst.com/flak/post/sct-set-color-temperature
 
-Original program can be found here https://github.com/faf0/sct.
+Original source code can be found here https://github.com/faf0/sct.
 
-Reason for making this is a lack of a f.lux linux counter part. A very primative implementation but works for my needs.
+Reason for making this is a lack of a f.lux counter part for linux. I do not like redshift. A very primative implementation but works for my needs.
 
-Minor modifications were made in order to get sct to:
-- compile on Ubuntu 14.04 and later releases
-- iterate over all screens of the default display and change the color
-  temperature
-- free the Display structure
-- fix memleaks
-- clean up code
-- return `EXIT_SUCCESS`
+# XSCTCF Changes over ttps://github.com/faf0/sct.
+- fixed the header locations
+- added -f (--chinese-flux) to use the chinese flux option
+- some syntatic changes
+- added macros to header
+- uses gnu99 over c99. Reason is for usleep().
 
 # Chinese Flux Usage
 
 Define your settings in the header file and make. The f.lux ripoff will check what hour it is local time and change the temperature of the screen gradually based on parameters. 
 
-Limitations: Only able to set two temeratures and two times. 
+Limitations: 
+- Only able to set two temeratures and two times
+- Needs to be killed manually
+- The program assumes that once running you will not change the screen temperature manually. With this it means the program has no clue what the screen temperature is after the initial        check. It will jump back to what the program thinks it should be. This is so it doesn't do unneccesary checks on the screen temperature.
 
 # Installation
 
@@ -104,7 +105,7 @@ The following options, which can be specified before the optional temperature pa
 - `-d <delta>`, `--delta <delta>`: shift temperature by the temperature value
 - `-s <screen>`, `--screen <screen>` `N`: use the screen specified by given zero-based index
 - `-c <crtc>`, `--crtc <crtc>` `N`: use the CRTC specified by given zero-based index
-- `-f <flux>`, `--chinese-flux <flux>` `flux`: performs like flux
+- `-f <flux>`, `--chinese-flux <flux>`: performs like flux
 
 Test xsctcf using the following command:
 ~~~sh
