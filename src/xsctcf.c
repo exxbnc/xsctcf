@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
         cFTemp.brightness = USER_BRIGHT;
         cFTemp.temp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug).temp;
 
-        int newTemp = currentHour > NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
+        int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
         int direction = newTemp > cFTemp.temp ? STEP_DIST: -STEP_DIST;
 
         while(1) {
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
                 usleep(STEP_SLEEP);
             }
 
-            newTemp = currentHour > NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
+            newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? USER_MIN : USER_MAX;
             direction = newTemp > cFTemp.temp ? STEP_DIST : -STEP_DIST;
 
             sleep(TIME_SLEEP);
