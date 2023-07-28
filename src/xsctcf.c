@@ -209,9 +209,6 @@ int main(int argc, char **argv) {
 
         if(!(STEP_DIST > 0)) exit(EXIT_FAILURE);
 
-        int feasibleMin = USER_MIN;
-        int feasibleMax = USER_MAX;
-
         time_t currentTime;
         struct tm *localTime;
         int currentHour = 0;
@@ -225,16 +222,13 @@ int main(int argc, char **argv) {
         cFTemp.temp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug).temp;
 
         
+        cFTemp.temp = ((cFTemp.temp + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
+        int feasibleMin = (((int)USER_MIN + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
+        int feasibleMax = (((int)USER_MAX + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
+
         int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
-        int step = newTemp > cFTemp.temp ? STEP_DIST : -STEP_DIST;
+        int step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
 
-        cFTemp.temp = ((cFTemp.temp + step / 2) / step) * step;        
-        feasibleMin = ((feasibleMin + step / 2) / step) * step;
-        feasibleMax = ((feasibleMax + step / 2) / step) * step;
-
-        newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
-        step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
-        
         while(1) {
             currentTime = time(NULL);
             localTime = localtime(&currentTime);
