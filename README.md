@@ -23,6 +23,13 @@ Define your settings in the header file and make. The f.lux ripoff will check wh
 
 Can use --verbose aswell to test your config to make sure it works as intented. 
 
+# Using it 
+Add to startup applications as /home/usr/dest/xsctcf -f
+or run using /home/usr/dest/xsctcf -f &
+
+# Stopping the process
+kill it using sigterm or sigkill
+
 Limitations: 
 - Only able to set two temeratures and two times
 - Needs to be killed manually
