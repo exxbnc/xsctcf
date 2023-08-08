@@ -232,11 +232,12 @@ int main(int argc, char **argv) {
             if(fdebug) fprintf(stderr,"DEBUG:\nStep: %d\nCurrent Temp: %d\nMax Temp: %d\nMin Temp: %d\n\n",step,cFTemp.temp,feasibleMax,feasibleMin);
 
             while(!step || newTemp != cFTemp.temp) {
-                for(screen = screen_first; screen <= screen_last; screen++)
-                    sct_for_screen(dpy, screen, crtc_specified, cFTemp, fdebug);
 
                 if(step) cFTemp.temp += step;
                 else step = STEP_DIST;
+
+                for(screen = screen_first; screen <= screen_last; screen++)
+                    sct_for_screen(dpy, screen, crtc_specified, cFTemp, fdebug);
 
                 usleep(STEP_SLEEP);
             }
