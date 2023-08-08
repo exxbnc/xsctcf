@@ -30,7 +30,7 @@ or run using /home/usr/dest/xsctcf -f &
 # Stopping the process
 kill it using sigterm or sigkill
 
-Limitations: 
+# Limitations: 
 - Only able to set two temeratures and two times
 - Needs to be killed manually
 - The program assumes that once running you will not change the screen temperature manually. With this it means the program has no clue what the screen temperature is after the initial        check. It will jump back to what the program thinks it should be. This is so it doesn't do unneccesary checks on the screen temperature.
