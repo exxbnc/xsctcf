@@ -24,8 +24,8 @@ Define your settings in the header file and make. The f.lux ripoff will check wh
 Can use --verbose aswell to test your config to make sure it works as intented. 
 
 # Using a config
-To use the config run "make config". This will generate a config file at HOME/.config/xsctcf/xsctcf.con
-The program will automatically use the config over the default values
+To use the config run "make config". This will generate a config file at HOME/.config/xsctcf/xsctcf.conf
+The program will automatically use the config values over the default values
 
 # Using it 
 Add to startup applications as /home/usr/dest/xsctcf -f
