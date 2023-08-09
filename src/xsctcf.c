@@ -223,12 +223,13 @@ int main(int argc, char **argv) {
     }
 
     if(cflux) {
-
         int USER_MIN =  DEFAULT_USER_MIN;          
         int USER_MAX =  DEFAULT_USER_MAX;     
         float USER_BRIGHT = DEFAULT_USER_BRIGHT;
         int MORNING_TIME = DEFAULT_MORNING_TIME_HOUR;
+        int MORNING_TIME_MINUTES = DEFAULT_MORNING_TIME_MIN;
         int NIGHT_TIME = DEFAULT_NIGHT_TIME_HOUR;
+        int NIGHT_TIME_MINUTES = DEFAULT_NIGHT_TIME_MIN;
         int TIME_SLEEP = DEFAULT_TIME_SLEEP;
         int STEP_SLEEP = DEFAULT_STEP_SLEEP;
         int STEP_DIST = DEFAULT_STEP_DIST;
@@ -251,12 +252,13 @@ int main(int argc, char **argv) {
                 char *value = trim(strtok(NULL, "="));
 
                 if (!(param && value)) continue;
-
                 if (strcmp(trim(param), "USER_MIN") == 0)  USER_MIN = atoi(value);
                 else if (strcmp(param, "USER_MAX") == 0) USER_MAX = atoi(value);
                 else if (strcmp(param, "USER_BRIGHT") == 0) USER_BRIGHT = atof(value);
                 else if (strcmp(param, "MORNING_TIME") == 0) MORNING_TIME = atoi(value);
+                else if (strcmp(param, "MORNING_TIME_MINUTES") == 0) MORNING_TIME_MINUTES = atoi(value);
                 else if (strcmp(param, "NIGHT_TIME") == 0) NIGHT_TIME = atoi(value);
+                else if (strcmp(param, "NIGHT_TIME_MINUTES") == 0) NIGHT_TIME_MINUTES = atoi(value);
                 else if (strcmp(param, "TIME_SLEEP") == 0) TIME_SLEEP = atoi(value);
                 else if (strcmp(param, "STEP_SLEEP") == 0) STEP_SLEEP = atoi(value);
                 else if (strcmp(param, "STEP_DIST") == 0) STEP_DIST = atoi(value); 
@@ -266,16 +268,35 @@ int main(int argc, char **argv) {
             if(fdebug) fprintf(stderr,"Using Config\n\n");
         }
         else if(fdebug) fprintf(stderr, "Not Using Config\nWill Use Default Values!\n\n");
-        if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nNIGHT_TIME: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", USER_MIN, USER_MAX, USER_BRIGHT, MORNING_TIME, NIGHT_TIME, TIME_SLEEP, STEP_SLEEP, STEP_DIST);
+        if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nMORNING_TIME_MINUTES: %d\nNIGHT_TIME: %d\nNIGHT_TIME_MINUTES: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", USER_MIN, USER_MAX, USER_BRIGHT, MORNING_TIME, MORNING_TIME_MINUTES, NIGHT_TIME, NIGHT_TIME_MINUTES, TIME_SLEEP, STEP_SLEEP, STEP_DIST);
+
+        MORNING_TIME = MORNING_TIME * 100 + MORNING_TIME_MINUTES;
+        NIGHT_TIME = NIGHT_TIME * 100 + NIGHT_TIME_MINUTES;
 
         // Config error handling
-        if(STEP_DIST <= 0 || MORNING_TIME > NIGHT_TIME || USER_BRIGHT <= 0 || USER_MAX <= 100 || USER_MIN <= 100 || MORNING_TIME <= 0 || NIGHT_TIME <= 0 || TIME_SLEEP <= 0 || STEP_SLEEP <= 0) exit(EXIT_FAILURE);
+        if(STEP_DIST <= 0 || 
+           MORNING_TIME > NIGHT_TIME || 
+           MORNING_TIME == NIGHT_TIME || 
+           USER_BRIGHT <= 0 || 
+           USER_MAX <= 100 || 
+           USER_MIN <= 100 || 
+           MORNING_TIME < 0 || 
+           NIGHT_TIME < 0 || 
+           TIME_SLEEP < 0 || 
+           STEP_SLEEP < 0 || 
+           MORNING_TIME_MINUTES < 0 || 
+           NIGHT_TIME_MINUTES < 0 || 
+           MORNING_TIME_MINUTES >= 60 || 
+           NIGHT_TIME_MINUTES >= 60) exit(EXIT_FAILURE);
 
         time_t currentTime = time(NULL);
         struct tm *localTime = localtime(&currentTime);
-        struct temp_status cFTemp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug);
 
-        int currentHour = localTime->tm_hour;
+        int currentHour = localTime->tm_hour * 100 + localTime->tm_min;
+
+        if(fdebug) fprintf(stderr, "Current Time: %d\nMorning Time: %d\nNight Time: %d\n\n", currentHour, MORNING_TIME, NIGHT_TIME);
+
+        struct temp_status cFTemp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug);
 
         cFTemp.brightness = USER_BRIGHT;
         
@@ -289,7 +310,7 @@ int main(int argc, char **argv) {
         while(1) {
             currentTime = time(NULL);
             localTime = localtime(&currentTime);
-            currentHour = localTime->tm_hour;
+            currentHour = localTime->tm_hour * 100 + localTime->tm_min;
 
             if(fdebug) fprintf(stderr,"DEBUG:\nStep: %d\nCurrent Temp: %d\nMax Temp: %d\nMin Temp: %d\n\n",step,cFTemp.temp,feasibleMax,feasibleMin);
 
