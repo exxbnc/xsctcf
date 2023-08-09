@@ -36,14 +36,14 @@
 #define DELTA_MIN           -1000000
 
 // Below defines the chineseflux constants
-#define USER_MIN             3500         // MIN TEMP
-#define USER_MAX             6000         // MAX TEMP
-#define USER_BRIGHT           1.0         // BRRIGHTNESS
-#define MORNING_TIME           10         // TIME IN HOURS FOR MORNING
-#define NIGHT_TIME             22         // TIME IN HOURS FOR NIGHT 
-#define TIME_SLEEP             10         // SLEEP TIME BETWEEN CHECKS IN SECONDS
-#define STEP_SLEEP          50000         // SLEEP TIME BETWEEN TEMP STEPS IN MICROSECONDS 
-#define STEP_DIST               1         // STEP BETWEEN COLORS
+#define DEFAULT_USER_MIN             3500         // MIN TEMP
+#define DEFAULT_USER_MAX             6000         // MAX TEMP
+#define DEFAULT_USER_BRIGHT           1.0         // BRRIGHTNESS
+#define DEFAULT_MORNING_TIME           10         // TIME IN HOURS FOR MORNING
+#define DEFAULT_NIGHT_TIME             22         // TIME IN HOURS FOR NIGHT 
+#define DEFAULT_TIME_SLEEP             10         // SLEEP TIME BETWEEN CHECKS IN SECONDS
+#define DEFAULT_STEP_SLEEP          50000         // SLEEP TIME BETWEEN TEMP STEPS IN MICROSECONDS 
+#define DEFAULT_STEP_DIST               1         // STEP BETWEEN COLORS
 
 struct temp_status {
     int temp;
@@ -54,5 +54,6 @@ static void usage(char * pname);
 static double DoubleTrim(double x, double a, double b);
 static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc, int fdebug);
 static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp, int fdebug);
+char *trim(char *str);
 
 #endif /* __XSCTCF_H */

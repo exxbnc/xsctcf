@@ -19,6 +19,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <pwd.h>
+
 static void usage(char * pname) {
     printf("Xsct (%s)\n"
            "Usage: %s [options] [temperature] [brightness]\n"
@@ -154,6 +156,21 @@ static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_stat
     XFree(res);
 }
 
+char *trim(char *str) {
+    while (*str == ' ' || *str == '\t' || *str == '\n') {
+        str++;
+    }
+    if (*str == '\0') {
+        return str;
+    }
+    char *end = str + strlen(str) - 1;
+    while (end > str && (*end == ' ' || *end == '\t' || *end == '\n')) {
+        end--;
+    }
+    *(end + 1) = '\0';
+    return str;
+}
+
 int main(int argc, char **argv) {
     int i, screen, screens;
     int screen_specified, screen_first, screen_last, crtc_specified;
@@ -206,6 +223,46 @@ int main(int argc, char **argv) {
     }
 
     if(cflux) {
+        int USER_MIN =  DEFAULT_USER_MIN;          
+        int USER_MAX =  DEFAULT_USER_MAX;     
+        float USER_BRIGHT = DEFAULT_USER_BRIGHT;
+        int MORNING_TIME = DEFAULT_MORNING_TIME;
+        int NIGHT_TIME = DEFAULT_NIGHT_TIME;
+        int TIME_SLEEP = DEFAULT_TIME_SLEEP;
+        int STEP_SLEEP = DEFAULT_STEP_SLEEP;
+        int STEP_DIST = DEFAULT_STEP_DIST;
+
+        char *uHomeDir = getenv("HOME");
+        char uDest[128];
+        strncpy(uDest, uHomeDir, sizeof(uDest) - 1);
+        strncat(uDest, "/.config/xsctcf/xsctcf.conf", sizeof(uDest) - strlen(uDest) - 1);
+
+        FILE *uConfig;
+
+        if(access(uDest, F_OK)!= -1){
+            uConfig = fopen(uDest, "r");
+            char line[100];
+            while (fgets(line, sizeof(line), uConfig)) {
+                char *trimmedLine = trim(line);
+                if (strlen(trimmedLine) == 0 || trimmedLine[0] == '#') continue;  // Skip empty lines and comments
+
+                char *param = strtok(trimmedLine, "=");
+                char *value = strtok(NULL, "=");
+
+                if (param && value) {
+                    if (strcmp(trim(param), "USER_MIN") == 0)  USER_MIN = atoi(trim(value));
+                    else if (strcmp(trim(param), "USER_MAX") == 0) USER_MAX = atoi(trim(value));
+                    else if (strcmp(trim(param), "USER_BRIGHT") == 0) USER_BRIGHT = atof(trim(value));
+                    else if (strcmp(trim(param), "MORNING_TIME") == 0) MORNING_TIME = atoi(trim(value));
+                    else if (strcmp(trim(param), "NIGHT_TIME") == 0) NIGHT_TIME = atoi(trim(value));
+                    else if (strcmp(trim(param), "TIME_SLEEP") == 0) TIME_SLEEP = atoi(trim(value));
+                    else if (strcmp(trim(param), "STEP_SLEEP") == 0) STEP_SLEEP = atoi(trim(value));
+                    else if (strcmp(trim(param), "STEP_DIST") == 0) STEP_DIST = atoi(trim(value));
+                }
+            }
+
+            fclose(uConfig);
+        }
 
         if(!(STEP_DIST > 0)) exit(EXIT_FAILURE);
 
