@@ -244,10 +244,10 @@ int main(int argc, char **argv) {
             uConfig = fopen(uDest, "r");
             char line[100];
             while (fgets(line, sizeof(line), uConfig)) {
-                char *line = trim(line);
-                if (strlen(line) == 0 || line[0] == '#') continue;  // Skip empty lines and comments
+                char *tLine = trim(line);
+                if (strlen(tLine) == 0 || tLine[0] == '#') continue;  // Skip empty lines and comments
 
-                char *param = trim(strtok(line, "="));
+                char *param = trim(strtok(tLine, "="));
                 char *value = trim(strtok(NULL, "="));
 
                 if (!(param && value)) continue;
@@ -259,12 +259,14 @@ int main(int argc, char **argv) {
                 else if (strcmp(param, "NIGHT_TIME") == 0) NIGHT_TIME = atoi(value);
                 else if (strcmp(param, "TIME_SLEEP") == 0) TIME_SLEEP = atoi(value);
                 else if (strcmp(param, "STEP_SLEEP") == 0) STEP_SLEEP = atoi(value);
-                else if (strcmp(param, "STEP_DIST") == 0) STEP_DIST = atoi(value);
-                
+                else if (strcmp(param, "STEP_DIST") == 0) STEP_DIST = atoi(value); 
             }
 
             fclose(uConfig);
+            if(fdebug) fprintf(stderr,"Using Config\n\n");
         }
+        else if(fdebug) fprintf(stderr, "Not Using Config\nWill Use Default Values!\n\n");
+        if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nNIGHT_TIME: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", USER_MIN, USER_MAX, USER_BRIGHT, MORNING_TIME, NIGHT_TIME, TIME_SLEEP, STEP_SLEEP, STEP_DIST);
 
         if(!(STEP_DIST > 0)) exit(EXIT_FAILURE);
 
