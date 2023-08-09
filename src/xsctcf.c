@@ -227,8 +227,8 @@ int main(int argc, char **argv) {
         int USER_MIN =  DEFAULT_USER_MIN;          
         int USER_MAX =  DEFAULT_USER_MAX;     
         float USER_BRIGHT = DEFAULT_USER_BRIGHT;
-        int MORNING_TIME = DEFAULT_MORNING_TIME;
-        int NIGHT_TIME = DEFAULT_NIGHT_TIME;
+        int MORNING_TIME = DEFAULT_MORNING_TIME_HOUR;
+        int NIGHT_TIME = DEFAULT_NIGHT_TIME_HOUR;
         int TIME_SLEEP = DEFAULT_TIME_SLEEP;
         int STEP_SLEEP = DEFAULT_STEP_SLEEP;
         int STEP_DIST = DEFAULT_STEP_DIST;
@@ -268,7 +268,8 @@ int main(int argc, char **argv) {
         else if(fdebug) fprintf(stderr, "Not Using Config\nWill Use Default Values!\n\n");
         if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nNIGHT_TIME: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", USER_MIN, USER_MAX, USER_BRIGHT, MORNING_TIME, NIGHT_TIME, TIME_SLEEP, STEP_SLEEP, STEP_DIST);
 
-        if(!(STEP_DIST > 0)) exit(EXIT_FAILURE);
+        // Config error handling
+        if(STEP_DIST <= 0 || MORNING_TIME > NIGHT_TIME || USER_BRIGHT <= 0 || USER_MAX <= 100 || USER_MIN <= 100 || MORNING_TIME <= 0 || NIGHT_TIME <= 0 || TIME_SLEEP <= 0 || STEP_SLEEP <= 0) exit(EXIT_FAILURE);
 
         time_t currentTime = time(NULL);
         struct tm *localTime = localtime(&currentTime);
