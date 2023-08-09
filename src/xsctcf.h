@@ -54,6 +54,6 @@ static void usage(char * pname);
 static double DoubleTrim(double x, double a, double b);
 static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc, int fdebug);
 static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp, int fdebug);
-char *trim(char *str);
+static char *trim(char *str);
 
 #endif /* __XSCTCF_H */
