@@ -52,10 +52,26 @@ struct temp_status {
     double brightness;
 };
 
+struct cf_config {
+    int USER_MIN;
+    int USER_MAX;
+    float USER_BRIGHT;
+    int MORNING_TIME;
+    int MORNING_TIME_MINUTES;
+    int NIGHT_TIME;
+    int NIGHT_TIME_MINUTES;
+    int TIME_SLEEP;
+    int STEP_SLEEP;
+    int STEP_DIST;
+};
+
 static void usage(char * pname);
 static double DoubleTrim(double x, double a, double b);
 static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc, int fdebug);
 static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp, int fdebug);
 static char *trim(char *str);
+static struct cf_config* getDefault();
+static void loadConfig(struct cf_config* dat, int fdebug);
+static void errorHandle(struct cf_config* dat, int fdebug);
 
 #endif /* __XSCTCF_H */

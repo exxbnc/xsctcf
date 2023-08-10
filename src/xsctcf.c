@@ -7,6 +7,7 @@
 
 #include "xsctcf.h"
 
+#include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
@@ -171,6 +172,123 @@ static char *trim(char *str) {
     return str;
 }
 
+static struct cf_config* getDefault(){
+    struct cf_config *defaultConfig = (struct cf_config *)malloc(sizeof(struct cf_config));
+    defaultConfig->USER_MIN =  DEFAULT_USER_MIN;          
+    defaultConfig->USER_MAX =  DEFAULT_USER_MAX;     
+    defaultConfig->USER_BRIGHT = DEFAULT_USER_BRIGHT;
+    defaultConfig->MORNING_TIME = DEFAULT_MORNING_TIME_HOUR;
+    defaultConfig->MORNING_TIME_MINUTES = DEFAULT_MORNING_TIME_MIN;
+    defaultConfig->NIGHT_TIME = DEFAULT_NIGHT_TIME_HOUR;
+    defaultConfig->NIGHT_TIME_MINUTES = DEFAULT_NIGHT_TIME_MIN;
+    defaultConfig->TIME_SLEEP = DEFAULT_TIME_SLEEP;
+    defaultConfig->STEP_SLEEP = DEFAULT_STEP_SLEEP;
+    defaultConfig->STEP_DIST = DEFAULT_STEP_DIST;
+    return defaultConfig;
+
+}
+
+static void loadConfig(struct cf_config* dat, int fdebug){
+    char *uHomeDir = getenv("HOME");
+    char uDest[256];
+    strncpy(uDest, uHomeDir, sizeof(uDest) - 1);
+    strncat(uDest, "/.config/xsctcf/xsctcf.conf", sizeof(uDest) - strlen(uDest) - 1);
+
+    FILE *uConfig;
+
+    if(access(uDest, F_OK)!= -1){
+        uConfig = fopen(uDest, "r");
+        char line[100];
+        while (fgets(line, sizeof(line), uConfig)) {
+            char *tLine = trim(line);
+            if (strlen(tLine) == 0 || tLine[0] == '#') continue;  // Skip empty lines and comments
+
+            char *param = trim(strtok(tLine, "="));
+            char *value = trim(strtok(NULL, "="));
+
+            if (!(param && value)) continue;
+            if (strcmp(trim(param), "USER_MIN") == 0) dat->USER_MIN = atoi(value);
+            else if (strcmp(param, "USER_MAX") == 0) dat->USER_MAX = atoi(value);
+            else if (strcmp(param, "USER_BRIGHT") == 0) dat->USER_BRIGHT = atof(value);
+            else if (strcmp(param, "MORNING_TIME") == 0) dat->MORNING_TIME = atoi(value);
+            else if (strcmp(param, "MORNING_TIME_MINUTES") == 0) dat->MORNING_TIME_MINUTES = atoi(value);
+            else if (strcmp(param, "NIGHT_TIME") == 0) dat->NIGHT_TIME = atoi(value);
+            else if (strcmp(param, "NIGHT_TIME_MINUTES") == 0) dat->NIGHT_TIME_MINUTES = atoi(value);
+            else if (strcmp(param, "TIME_SLEEP") == 0) dat->TIME_SLEEP = atoi(value);
+            else if (strcmp(param, "STEP_SLEEP") == 0) dat->STEP_SLEEP = atoi(value);
+            else if (strcmp(param, "STEP_DIST") == 0) dat->STEP_DIST = atoi(value); 
+        }
+
+        fclose(uConfig);
+        if(fdebug) fprintf(stderr,"Using Config\n\n");
+    }
+    else if(fdebug) fprintf(stderr, "Not Using Config\nWill Use Default Values!\n\n");
+    if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nMORNING_TIME_MINUTES: %d\nNIGHT_TIME: %d\nNIGHT_TIME_MINUTES: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", dat->USER_MIN, dat->USER_MAX, dat->USER_BRIGHT, dat->MORNING_TIME, dat->MORNING_TIME_MINUTES, dat->NIGHT_TIME, dat->NIGHT_TIME_MINUTES, dat->TIME_SLEEP, dat->STEP_SLEEP, dat->STEP_DIST);
+    dat->MORNING_TIME = dat->MORNING_TIME * 100 + dat->MORNING_TIME_MINUTES;
+    dat->NIGHT_TIME = dat->NIGHT_TIME * 100 + dat->NIGHT_TIME_MINUTES;
+}
+
+static void errorHandle(struct cf_config* dat, int fdebug){
+    int error = 0;
+    if(dat->STEP_DIST <= 0){
+        if(fdebug) fprintf(stderr,"Step Distance invalid. Must be greater than 0\n");
+        error = 1;
+    }
+    if(dat->MORNING_TIME > dat->NIGHT_TIME){
+        if(fdebug) fprintf(stderr,"Morning Time is greater than Night Time\n");
+        error = 1;
+    }
+    if(dat->MORNING_TIME == dat->NIGHT_TIME){
+        if(fdebug) fprintf(stderr,"Night Time is equal to Morning Time\n");
+        error = 1;
+    }  
+    if(dat->USER_BRIGHT <= 0){
+        if(fdebug) fprintf(stderr,"User Brightness would not be visable\n");
+        error = 1;
+    }
+    if(dat->USER_MAX <= 100){
+        if(fdebug) fprintf(stderr,"Max Temp not high enough\n");
+        error = 1;
+    }
+    if(dat->USER_MIN <= 100){
+        if(fdebug) fprintf(stderr,"Min Temp not high enough\n");
+        error = 1;
+    }
+    if(dat->MORNING_TIME < 0 || dat->MORNING_TIME >= 2400){
+        if(fdebug) fprintf(stderr,"Morning Time is not valid\n");
+        error = 1;
+    }
+    if(dat->NIGHT_TIME < 0 || dat->NIGHT_TIME >= 2400){
+        if(fdebug) fprintf(stderr,"Night Time is not valid\n");
+        error = 1;
+    }
+    if(dat->TIME_SLEEP < 0){
+        if(fdebug) fprintf(stderr,"Negative Sleep Time\n");
+        error = 1;
+    }
+    if(dat->STEP_SLEEP < 0){
+        if(fdebug) fprintf(stderr,"Negative Step Sleep Time\n");
+        error = 1;
+    }
+    if(dat->MORNING_TIME_MINUTES < 0){
+        if(fdebug) fprintf(stderr,"Negative Morning Minutes\n");
+        error = 1;
+    }
+    if(dat->NIGHT_TIME_MINUTES < 0){
+        if(fdebug) fprintf(stderr,"Negative Night Minutes\n");
+        error = 1;
+    }
+    if(dat->MORNING_TIME_MINUTES >= 60){
+        if(fdebug) fprintf(stderr,"Morning Minutes greater or equal 1 hour\n");
+        error = 1;
+    }
+    if(dat->NIGHT_TIME_MINUTES >= 60){
+        if(fdebug) fprintf(stderr,"Night minutes greater or equal 1 hour\n");
+        error = 1;
+    }
+    if(error) exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
     int i, screen, screens;
     int screen_specified, screen_first, screen_last, crtc_specified;
@@ -223,89 +341,27 @@ int main(int argc, char **argv) {
     }
 
     if(cflux) {
-        int USER_MIN =  DEFAULT_USER_MIN;          
-        int USER_MAX =  DEFAULT_USER_MAX;     
-        float USER_BRIGHT = DEFAULT_USER_BRIGHT;
-        int MORNING_TIME = DEFAULT_MORNING_TIME_HOUR;
-        int MORNING_TIME_MINUTES = DEFAULT_MORNING_TIME_MIN;
-        int NIGHT_TIME = DEFAULT_NIGHT_TIME_HOUR;
-        int NIGHT_TIME_MINUTES = DEFAULT_NIGHT_TIME_MIN;
-        int TIME_SLEEP = DEFAULT_TIME_SLEEP;
-        int STEP_SLEEP = DEFAULT_STEP_SLEEP;
-        int STEP_DIST = DEFAULT_STEP_DIST;
-
-        char *uHomeDir = getenv("HOME");
-        char uDest[256];
-        strncpy(uDest, uHomeDir, sizeof(uDest) - 1);
-        strncat(uDest, "/.config/xsctcf/xsctcf.conf", sizeof(uDest) - strlen(uDest) - 1);
-
-        FILE *uConfig;
-
-        if(access(uDest, F_OK)!= -1){
-            uConfig = fopen(uDest, "r");
-            char line[100];
-            while (fgets(line, sizeof(line), uConfig)) {
-                char *tLine = trim(line);
-                if (strlen(tLine) == 0 || tLine[0] == '#') continue;  // Skip empty lines and comments
-
-                char *param = trim(strtok(tLine, "="));
-                char *value = trim(strtok(NULL, "="));
-
-                if (!(param && value)) continue;
-                if (strcmp(trim(param), "USER_MIN") == 0)  USER_MIN = atoi(value);
-                else if (strcmp(param, "USER_MAX") == 0) USER_MAX = atoi(value);
-                else if (strcmp(param, "USER_BRIGHT") == 0) USER_BRIGHT = atof(value);
-                else if (strcmp(param, "MORNING_TIME") == 0) MORNING_TIME = atoi(value);
-                else if (strcmp(param, "MORNING_TIME_MINUTES") == 0) MORNING_TIME_MINUTES = atoi(value);
-                else if (strcmp(param, "NIGHT_TIME") == 0) NIGHT_TIME = atoi(value);
-                else if (strcmp(param, "NIGHT_TIME_MINUTES") == 0) NIGHT_TIME_MINUTES = atoi(value);
-                else if (strcmp(param, "TIME_SLEEP") == 0) TIME_SLEEP = atoi(value);
-                else if (strcmp(param, "STEP_SLEEP") == 0) STEP_SLEEP = atoi(value);
-                else if (strcmp(param, "STEP_DIST") == 0) STEP_DIST = atoi(value); 
-            }
-
-            fclose(uConfig);
-            if(fdebug) fprintf(stderr,"Using Config\n\n");
-        }
-        else if(fdebug) fprintf(stderr, "Not Using Config\nWill Use Default Values!\n\n");
-        if(fdebug) fprintf(stderr, "USER_MIN: %d\nUSER_MAX: %d\nUSER_BRIGHT: %f\nMORNING_TIME: %d\nMORNING_TIME_MINUTES: %d\nNIGHT_TIME: %d\nNIGHT_TIME_MINUTES: %d\nTIME_SLEEP: %d\nSTEP_SLEEP: %d\nSTEP_DIST: %d\n\n", USER_MIN, USER_MAX, USER_BRIGHT, MORNING_TIME, MORNING_TIME_MINUTES, NIGHT_TIME, NIGHT_TIME_MINUTES, TIME_SLEEP, STEP_SLEEP, STEP_DIST);
-
-        MORNING_TIME = MORNING_TIME * 100 + MORNING_TIME_MINUTES;
-        NIGHT_TIME = NIGHT_TIME * 100 + NIGHT_TIME_MINUTES;
-
-        // Config error handling
-        if(STEP_DIST <= 0 || 
-           MORNING_TIME > NIGHT_TIME || 
-           MORNING_TIME == NIGHT_TIME || 
-           USER_BRIGHT <= 0 || 
-           USER_MAX <= 100 || 
-           USER_MIN <= 100 || 
-           MORNING_TIME < 0 || 
-           NIGHT_TIME < 0 || 
-           TIME_SLEEP < 0 || 
-           STEP_SLEEP < 0 || 
-           MORNING_TIME_MINUTES < 0 || 
-           NIGHT_TIME_MINUTES < 0 || 
-           MORNING_TIME_MINUTES >= 60 || 
-           NIGHT_TIME_MINUTES >= 60) exit(EXIT_FAILURE);
+        struct cf_config* cfdat = getDefault();
+        loadConfig(cfdat, fdebug);
+        errorHandle(cfdat, fdebug);
 
         time_t currentTime = time(NULL);
         struct tm *localTime = localtime(&currentTime);
 
         int currentHour = localTime->tm_hour * 100 + localTime->tm_min;
 
-        if(fdebug) fprintf(stderr, "Current Time: %d\nMorning Time: %d\nNight Time: %d\n\n", currentHour, MORNING_TIME, NIGHT_TIME);
+        if(fdebug) fprintf(stderr, "Current Time: %d\nMorning Time: %d\nNight Time: %d\n\n", currentHour, cfdat->MORNING_TIME, cfdat->NIGHT_TIME);
 
         struct temp_status cFTemp = get_sct_for_screen(dpy, screen_first, crtc_specified, fdebug);
 
-        cFTemp.brightness = USER_BRIGHT;
+        cFTemp.brightness = cfdat->USER_BRIGHT;
         
-        cFTemp.temp = ((cFTemp.temp + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
-        int feasibleMin = ((USER_MIN + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
-        int feasibleMax = ((USER_MAX + STEP_DIST / 2) / STEP_DIST) * STEP_DIST;
+        cFTemp.temp = ((cFTemp.temp + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
+        int feasibleMin = ((cfdat->USER_MIN + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
+        int feasibleMax = ((cfdat->USER_MAX + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
 
-        int newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
-        int step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
+        int newTemp = currentHour >= cfdat->NIGHT_TIME || currentHour < cfdat->MORNING_TIME ? feasibleMin : feasibleMax;
+        int step = newTemp > cFTemp.temp ? cfdat->STEP_DIST : (newTemp == cFTemp.temp ? 0 : -cfdat->STEP_DIST);
 
         while(1) {
             currentTime = time(NULL);
@@ -317,19 +373,21 @@ int main(int argc, char **argv) {
             while(!step || newTemp != cFTemp.temp) {
 
                 if(step) cFTemp.temp += step;
-                else step = STEP_DIST;
+                else step = cfdat->STEP_DIST;
 
                 for(screen = screen_first; screen <= screen_last; screen++)
                     sct_for_screen(dpy, screen, crtc_specified, cFTemp, fdebug);
 
-                usleep(STEP_SLEEP);
+                usleep(cfdat->STEP_SLEEP);
             }
 
-            newTemp = currentHour >= NIGHT_TIME || currentHour < MORNING_TIME ? feasibleMin : feasibleMax;
-            step = newTemp > cFTemp.temp ? STEP_DIST : (newTemp == cFTemp.temp ? 0 : -STEP_DIST);
+            newTemp = currentHour >= cfdat->NIGHT_TIME || currentHour < cfdat->MORNING_TIME ? feasibleMin : feasibleMax;
+            step = newTemp > cFTemp.temp ? cfdat->STEP_DIST : (newTemp == cFTemp.temp ? 0 : -cfdat->STEP_DIST);
 
-            sleep(TIME_SLEEP);
+            sleep(cfdat->TIME_SLEEP);
         }
+        XCloseDisplay(dpy);
+        free(cfdat);
     }
 
     if (fhelp > 0) {
