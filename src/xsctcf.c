@@ -288,6 +288,10 @@ static void errorHandle(struct cf_config* dat, int fdebug){
     if(error) exit(EXIT_FAILURE);
 }
 
+static int stepApprox(int value, int step){
+    return ((value + step / 2) / step) * step;
+}
+
 int main(int argc, char **argv) {
     int i, screen, screens;
     int screen_specified, screen_first, screen_last, crtc_specified;
@@ -355,9 +359,9 @@ int main(int argc, char **argv) {
 
         cFTemp.brightness = cfdat->USER_BRIGHT;
         
-        cFTemp.temp = ((cFTemp.temp + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
-        int feasibleMin = ((cfdat->USER_MIN + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
-        int feasibleMax = ((cfdat->USER_MAX + cfdat->STEP_DIST / 2) / cfdat->STEP_DIST) * cfdat->STEP_DIST;
+        cFTemp.temp = stepApprox(cFTemp.temp, cfdat->STEP_DIST);
+        int feasibleMin = stepApprox(cfdat->USER_MIN, cfdat->STEP_DIST);
+        int feasibleMax = stepApprox(cfdat->USER_MAX, cfdat->STEP_DIST);
 
         int newTemp = currentHour >= cfdat->NIGHT_TIME || currentHour < cfdat->MORNING_TIME ? feasibleMin : feasibleMax;
         int step = newTemp > cFTemp.temp ? cfdat->STEP_DIST : (newTemp == cFTemp.temp ? 0 : -cfdat->STEP_DIST);

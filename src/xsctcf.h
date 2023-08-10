@@ -73,5 +73,6 @@ static char *trim(char *str);
 static struct cf_config* getDefault();
 static void loadConfig(struct cf_config* dat, int fdebug);
 static void errorHandle(struct cf_config* dat, int fdebug);
+static int stepApprox(int value, int step);
 
 #endif /* __XSCTCF_H */
