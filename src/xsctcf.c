@@ -173,7 +173,7 @@ static char *trim(char *str) {
 }
 
 static struct cf_config* getDefault(){
-    struct cf_config *defaultConfig = (struct cf_config *)malloc(sizeof(struct cf_config));
+    struct cf_config* defaultConfig = (struct cf_config *)malloc(sizeof(struct cf_config));
     defaultConfig->USER_MIN =  DEFAULT_USER_MIN;          
     defaultConfig->USER_MAX =  DEFAULT_USER_MAX;     
     defaultConfig->USER_BRIGHT = DEFAULT_USER_BRIGHT;
@@ -185,7 +185,6 @@ static struct cf_config* getDefault(){
     defaultConfig->STEP_SLEEP = DEFAULT_STEP_SLEEP;
     defaultConfig->STEP_DIST = DEFAULT_STEP_DIST;
     return defaultConfig;
-
 }
 
 static void loadConfig(struct cf_config* dat, int fdebug){
