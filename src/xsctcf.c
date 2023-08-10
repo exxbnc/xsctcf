@@ -1,6 +1,5 @@
 /*
  * xsctcf - X11 set color temperature
- * To use the chinese flux run with -f 
  *
  * Public domain, do as you wish.
  */
